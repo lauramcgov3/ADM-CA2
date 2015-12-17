@@ -25,13 +25,13 @@ create table items
     ItemNumber int,
     ItemCategory varchar (20) not null,
     ItemTitle varchar (30) not null,
-    Description varchar (60) not null,
+    Description varchar (100) not null,
     SellerId int,
     SellerUname varchar (20),
     QuantityAvailable int not null,
     StartPrice float not null,
-    LastBidRecPrice float,
-    CloseTime date not null,
+    LastBidRecPrice float, -- Highest current bid
+    CloseTimeDate date not null,
     primary key (ItemNumber, ItemTitle),
     foreign key (SellerId, SellerUname) 
     references members (MemberId, MemberUname)
@@ -58,7 +58,7 @@ create table bid
     ItemTitle varchar (30),
     BidPrice float, -- This will auto-update the price of the item in the item table (LastBidRecPrice)
     QtyWanted int,
-    BidTime date,
+    BidTimeDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     primary key (BidId, BuyerId, ItemNumber, BidPrice),
     foreign key (BuyerId, BuyerUname) 
     references members (MemberId, MemberUname),

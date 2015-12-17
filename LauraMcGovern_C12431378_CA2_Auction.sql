@@ -51,6 +51,7 @@ create table shipping
 --Table for bid information
 create table bid 
 (
+    BidId int,
     BuyerId int,
     BuyerUname varchar (20),
     ItemNumber int,
@@ -58,7 +59,7 @@ create table bid
     BidPrice float, -- This will auto-update the price of the item in the item table (LastBidRecPrice)
     QtyWanted int,
     BidTime date,
-    primary key (BuyerId, ItemNumber, BidPrice),
+    primary key (BidId, BuyerId, ItemNumber, BidPrice),
     foreign key (BuyerId, BuyerUname) 
     references members (MemberId, MemberUname),
     foreign key (ItemNumber, ItemTitle) references items (ItemNumber, ItemTitle)
@@ -75,10 +76,11 @@ create table winningBid
     SellerId int,
     SellerUname varchar (20),
     FinalPrice float,
+    QtyWanted int, --Will auto-update quantity available for item
     ShippingType varchar (20),
     ShippingPrice float,
-    foreign key (ItemNumber, ItemTitle) references items (ItemNumber, ItemTitle),
-    foreign key (BuyerId, BuyerUname) references members (MemberId, MemberUname),
+    primary key (WinningBidId, BuyerId, ItemNumber, ItemTitle),
+    foreign key (WinningBidId, BuyerId, ItemNumber, FinalPrice) references bid (BidId, BuyerId, ItemNumber, BidPrice),
     foreign key (SellerId, SellerUname) references members (MemberId, MemberUname),
     foreign key (ItemNumber, ItemTitle, ShippingType, ShippingPrice) references shipping (ItemNumber, ItemTitle, ShippingType, ShippingPrice)
 );

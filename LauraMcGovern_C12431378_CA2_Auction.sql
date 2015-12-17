@@ -1,89 +1,115 @@
---drop table members
---drop table items
---drop table shipping
---drop table bid
---drop table rating
+drop table members;
+drop table items;
+drop table shipping;
+drop table bid;
+drop table winningBid;
+--drop table buyerRating
+--drop table sellerRating
 
 --Table for member information
 create table members 
 (
-    MemberId int auto_increment=100,
+    MemberId int,
     MemberUname varchar (20),
     MemberPassword varchar (15),
     Name varchar (50),
     Address varchar (100),
-    Phone int (10),
+    Phone int,
     Email varchar (50),
     primary key (MemberId, MemberUname)
 );
 
 --Table for item information
-create table item
+create table items
 (
-    ItemNumber int primary key auto_increment=100,
-    Category varchar (20) not null,
+    ItemNumber int,
+    ItemCategory varchar (20) not null,
     ItemTitle varchar (30) not null,
     Description varchar (60) not null,
-    SellerId int foreign key references members.UserID,
-    QuantityAvailable int (4) not null,
-    StartPrice fl (6) not null,
-    BidIncrement float (4),
-    LastBidRecPrice float (4),
-    CloseTime datetime not null
+    SellerId int,
+    SellerUname varchar (20),
+    QuantityAvailable int not null,
+    StartPrice float not null,
+    LastBidRecPrice float,
+    CloseTime date not null,
+    primary key (ItemNumber, ItemTitle),
+    foreign key (SellerId, SellerUname) 
+    references members (MemberId, MemberUname)
 );
 
 --Table for shipping information
 create table shipping 
 (
-    ItemNumber int foreign key references items.ItemNumber,
+    ItemNumber int,
+    ItemTitle varchar (30),
     ShippingType varchar (20) not null,
     ShippingPrice float not null,
-    primary key (ItemNumber, ShippingType, ShippingPrice)
+    primary key (ItemNumber, ItemTitle, ShippingType, ShippingPrice),
+    foreign key (ItemNumber, ItemTitle) references items (ItemNumber, ItemTitle)
 );
 
 --Table for bid information
 create table bid 
 (
-    BuyerId varchar foreign key references member,
-    ItemNumber int foreign key references item.ItemNumber,
-    BidPrice float, -- This will auto-update the price of the item in the item table
-    QtyWanted int (4),
-    BidTime timestamp,
-    primary key (BuyerId, ItemId, BidPrice)
+    BuyerId int,
+    BuyerUname varchar (20),
+    ItemNumber int,
+    ItemTitle varchar (30),
+    BidPrice float, -- This will auto-update the price of the item in the item table (LastBidRecPrice)
+    QtyWanted int,
+    BidTime date,
+    primary key (BuyerId, ItemNumber, BidPrice),
+    foreign key (BuyerId, BuyerUname) 
+    references members (MemberId, MemberUname),
+    foreign key (ItemNumber, ItemTitle) references items (ItemNumber, ItemTitle)
 );
 
 --Table for winning bid information
 create table winningBid
 (
-    ItemNumber int foreign key references item.ItemNumber,
-    BuyerId foreign key references members,
-    SellerId foreign key references members,
-    FinalPrice float foreign key references items.LastBidRecPrice
-    ShippingType varchar (20) foreign key references shipping,
-    ShippingPrice float foreign key references shipping,
-    primary key (ItemNumber, BuyerId, SellerId, FinalPrice)
+    WinningBidId int primary key,
+    ItemNumber int,
+    ItemTitle varchar (30),
+    BuyerId int,
+    BuyerUname varchar (20),
+    SellerId int,
+    SellerUname varchar (20),
+    FinalPrice float,
+    ShippingType varchar (20),
+    ShippingPrice float,
+    foreign key (ItemNumber, ItemTitle) references items (ItemNumber, ItemTitle),
+    foreign key (BuyerId, BuyerUname) references members (MemberId, MemberUname),
+    foreign key (SellerId, SellerUname) references members (MemberId, MemberUname),
+    foreign key (ItemNumber, ItemTitle, ShippingType, ShippingPrice) references shipping (ItemNumber, ItemTitle, ShippingType, ShippingPrice)
 );
 
 --Table for buyer ratings (rates members recieve as buyers)
-creat table buyerRating
+create table buyerRating
 (
-    ItemNumber int foreign key references item.ItemNumber,
-    ItemTitle int foreign key references item.ItemTitle,
-    BuyerId int foreign key references member,
-    BuyerUname varchar (20) foreign key references member,
+    RatingId int,
+    ItemNumber int,
+    ItemTitle varchar (30),
+    BuyerId int,
+    BuyerUname varchar (20),
     bComment varchar (50),
-    bScale int 
+    bScale int,
+    primary key (RatingId),
+    foreign key (ItemNumber, ItemTitle) references items (ItemNumber, ItemTitle),
+    foreign key (BuyerId, BuyerUname) references members (MemberId, MemberUname) 
 );
 
 --Table for seller ratings (rates members recieve as buyers)
-creat table sellerRating
+create table sellerRating
 (
-    ItemNumber int foreign key references item.ItemNumber,
-    ItemTitle int foreign key references item.ItemTitle,
-    SellerId int foreign key references member,
-    SellerUname varchar (20) foreign key references member,
+    RatingId int,
+    ItemNumber int,
+    ItemTitle int,
+    SellerId int,
+    SellerUname varchar (20),
     bComment varchar (50),
-    bScale int 
+    bScale int, 
+    foreign key (ItemNumber, ItemTitle) references item (ItemNumber, ItemTitle),
+    foreign key (SellerId, SellerUname) references members (MemberId, MemberUname)
 );
 
 

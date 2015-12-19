@@ -1,10 +1,10 @@
--- drop table sellerRating;
--- drop table buyerRating;
--- drop table winningBid;
--- drop table bid;
--- drop table shipping;
--- drop table items;
--- drop table members;
+drop table sellerRating;
+drop table buyerRating;
+drop table winningBid;
+drop table bid;
+drop table shipping;
+drop table items;
+drop table members;
 
 -- Creates for tables
 
@@ -16,7 +16,7 @@ create table members
     MemberPassword varchar (15),
     Name varchar (50),
     Address varchar (100),
-    Phone int,
+    Phone varchar (30),
     Email varchar (50),
     primary key (MemberId, MemberUname)
 );
@@ -35,7 +35,7 @@ create table items
     StartPrice float not null,
     LastBidRecPrice float,
     CloseTimeDate date,
-    Closed boolean,
+    Closed varchar (1),
     primary key (ItemNumber, ItemTitle),
     foreign key (SellerId, SellerUname) 
     references members (MemberId, MemberUname)
@@ -46,7 +46,7 @@ create table shipping
 (
     ItemNumber int,
     ItemTitle varchar (30),
-    ShippingType varchar (20) not null,
+    ShippingType varchar (100) not null,
     ShippingPrice float not null,
     primary key (ItemNumber, ItemTitle, ShippingType, ShippingPrice),
     foreign key (ItemNumber, ItemTitle) references items (ItemNumber, ItemTitle)
@@ -63,7 +63,7 @@ create table bid
     BidPrice float, -- This will auto-update the price of the item in the item table (LastBidRecPrice)
     QtyWanted int,
     BidTime date,
-    primary key (BuyerId, BuyerUname, ItemId, ItemNumber, BidPrice),
+    primary key (BuyerId, BuyerUname, ItemNumber, ItemTitle, BidPrice),
     foreign key (BuyerId, BuyerUname) 
     references members (MemberId, MemberUname),
     foreign key (ItemNumber, ItemTitle) references items (ItemNumber, ItemTitle)
@@ -80,10 +80,10 @@ create table winningBid
     SellerId int,
     SellerUname varchar (20),
     FinalPrice float,
-    QtyWanted int, --Will auto-update quantity available for item
-    ShippingType varchar (20), -- Auto-update shipping table
+    QtyWanted int, -- Will auto-update quantity available for item
+    ShippingType varchar (100), -- Auto-update shipping table
     ShippingPrice float, -- Get this from shipping table?
-    foreign key (BuyerId, BuyerUname, ItemId, ItemNumber, FinalPrice) references bid (BidId, BuyerId, ItemNumber, BidPrice),
+    foreign key (BuyerId, BuyerUname, ItemNumber, ItemTitle, FinalPrice) references bid (BuyerId, BuyerUname, ItemNumber, ItemTitle, BidPrice),
     foreign key (SellerId, SellerUname) references members (MemberId, MemberUname),
     foreign key (ItemNumber, ItemTitle, ShippingType, ShippingPrice) references shipping (ItemNumber, ItemTitle, ShippingType, ShippingPrice)
 );
@@ -91,13 +91,12 @@ create table winningBid
 -- Table for buyer ratings (rates members recieve as buyers)
 create table buyerRating
 (
-    bRatingId int,
+    bRatingId int primary key,
     ItemNumber int,
     ItemTitle varchar (30),
     BuyerId int,
     BuyerUname varchar (20),
     bComment varchar (50),
-    primary key (RatingId),
     foreign key (ItemNumber, ItemTitle) references items (ItemNumber, ItemTitle),
     foreign key (BuyerId, BuyerUname) references members (MemberId, MemberUname) 
 );
@@ -105,13 +104,13 @@ create table buyerRating
 -- Table for seller ratings (rates members recieve as buyers)
 create table sellerRating
 (
-    sRatingId int,
+    sRatingId int primary key,
     ItemNumber int,
-    ItemTitle int,
+    ItemTitle varchar (30),
     SellerId int,
     SellerUname varchar (20),
     bComment varchar (50),
-    foreign key (ItemNumber, ItemTitle) references item (ItemNumber, ItemTitle),
+    foreign key (ItemNumber, ItemTitle) references items (ItemNumber, ItemTitle),
     foreign key (SellerId, SellerUname) references members (MemberId, MemberUname)
 );
 
@@ -177,13 +176,13 @@ insert into items values (
     'iPhone 5', 
     'Black, perfect condition, 16GB, charger included', 
     1, 
-    'dlawson', 
+    'dlawson0', 
     5,
     'Newcastle, United Kingdom',
     140.00, 
     142.50, 
     TO_DATE('2015/12/30 15:22:00', 'yyyy/mm/dd hh24:mi:ss'),
-    false
+    'N'
 );
 
 insert into items values 
@@ -195,11 +194,11 @@ insert into items values
     3, 
     'lhill2', 
     3,
-    'Paris, France'
+    'Paris, France',
     7.00, 
     7.50, 
     TO_DATE('2016/01/03 21:02:44', 'yyyy/mm/dd hh24:mi:ss'),
-    false
+    'N'
 );
 
 insert into items values (
@@ -210,11 +209,11 @@ insert into items values (
     2, 
     'mreyes1', 
     50, 
-    'Cork, Ireland'
+    'Cork, Ireland',
     10.00, 
     12.00, 
     TO_DATE('2015/12/31 23:59:59', 'yyyy/mm/dd hh24:mi:ss'),
-    false
+    'N'
 );
 
 insert into items values 
@@ -226,11 +225,11 @@ insert into items values
     3, 
     'lhill2', 
     1,
-    'Paris, France'
+    'Paris, France',
     30.00, 
     35.50, 
-    TO_DATE('2016/03/31 15:40:59', 'yyyy/mm/dd hh24:mi:ss'),
-    true
+    TO_DATE('2015/03/31 15:40:59', 'yyyy/mm/dd hh24:mi:ss'),
+    'Y'
 );
 
 insert into items values (
@@ -241,11 +240,11 @@ insert into items values (
     5, 
     'awarren4', 
     2,
-    'Dublin, Ireland'
+    'Dublin, Ireland',
     60.00, 
     65.50, 
-    TO_DATE('2016/05/12 19:00:00', 'yyyy/mm/dd hh24:mi:ss'),
-    true
+    TO_DATE('2015/05/12 19:00:00', 'yyyy/mm/dd hh24:mi:ss'),
+    'Y'
 );
 
 insert into items values (
@@ -256,32 +255,32 @@ insert into items values (
     4 , 
     'hpayne3', 
     1,
-    'London, United Kingdom'
+    'London, United Kingdom',
     70.00, 
     75.50, 
-    TO_DATE('2016/05/12 19:00:00', 'yyyy/mm/dd hh24:mi:ss'),
-    true
+    TO_DATE('2015/05/16 00:00:00', 'yyyy/mm/dd hh24:mi:ss'),
+    'Y'
 );
 
 -- Inserts into shipping table
 insert into shipping values (
     4,
     'Kettle', 
-    'International Shipping',
+    'International',
     10.99
 );
 
 insert into shipping values (
     5, 
     'Romo Robot',
-    'Domestic Shipping',
+    'Domestic',
     5.50
 );
 
 insert into shipping values (
     6,
     'Thomas Sabo Bracelet', 
-    'International Shipping',
+    'International',
     10.99
 );
 
@@ -346,7 +345,7 @@ insert into bid values (
 insert into bid values (
     6, 
     1, 
-    'dlawson', 
+    'dlawson0', 
     5, 
     'Romo Robot', 
     65.50, 
@@ -368,7 +367,7 @@ insert into bid values (
 insert into bid values (
     8, 
     2, 
-    'mreyers1', 
+    'mreyes1', 
     2, 
     'The Fault in Our Stars', 
     1, 
@@ -393,8 +392,8 @@ insert into bid values (
     'dlawson0', 
     4, 
     'Kettle', 
-    1, 
-    33.50,
+    33.50, 
+    1,
     sysdate
 );
 
@@ -404,8 +403,8 @@ insert into bid values (
     'mreyes1', 
     6, 
     'Thomas Sabo Bracelet', 
-    1, 
-    72.00,
+    72.00, 
+    1,
     sysdate
 );
 
@@ -415,8 +414,8 @@ insert into bid values (
     'lhill2', 
     6, 
     'Thomas Sabo Bracelet', 
-    1, 
-    75.50,
+    75.50, 
+    1,
     sysdate
 );
 
@@ -430,9 +429,9 @@ insert into winningBid values (
     'dlawson0', 
     3,
     'lhill2',
-    35.50, 
+    33.50, 
     1, 
-    'International Shipping', 
+    'International', 
     10.99
 );
 
@@ -446,21 +445,21 @@ insert into winningBid values (
     'awarren4', 
     61.50, 
     1, 
-    'Domestic Shipping', 
+    'Domestic', 
     5.50
 );
 
 insert into winningBid values (
-    3, 
-    6, 
-    'Thomas Sabo Bracelet', 
-    2, 
-    'mreyes1', 
-    4, 
-    'hpayne3', 
-    75.50, 
-    1, 
-    'International Shipping', 
+    3,
+    6,
+    'Thomas Sabo Bracelet',
+    3,
+    'lhill2',
+    4,
+    'hpayne3',
+    75.50,
+    1,
+    'International',
     10.99
 );
 
@@ -477,9 +476,9 @@ insert into buyerRating values (
 insert into buyerRating values (
     2, 
     5, 
-    'Romo', 
+    'Romo Robot', 
     4, 
-    'hpayne', 
+    'hpayne3', 
     'Unreliable buyer'
 );
 
@@ -505,7 +504,7 @@ insert into sellerRating values (
 insert into sellerRating values (
     2, 
     5, 
-    'Romo', 
+    'Romo Robot', 
     5, 
     'awarren4', 
     'Unreliable Seller'
